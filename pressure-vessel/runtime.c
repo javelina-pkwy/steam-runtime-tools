@@ -8456,7 +8456,22 @@ pv_runtime_use_provider_graphics_stack (PvRuntime *self,
         {
           IcdDetails *details = g_ptr_array_index (host_stack->vulkan_icd_details, i);
           SrtVulkanIcd *icd = SRT_VULKAN_ICD (details->icd);
-          _srt_search_path_append (vulkan_path, srt_vulkan_icd_get_json_path (icd));
+          const char *json_path = srt_vulkan_icd_get_json_path (icd);
+          g_autofree gchar *mapped_path = NULL;
+
+          /*
+           * Some GPU driver installation paths (ie. NVIDIA .run installers)
+           * put the icd files in /etc/vulkan/icd.d, which we need to allow to be passed
+           * through to an interpreter (eg. FEX).
+           */
+
+          if (_srt_get_path_after (json_path, "/etc") != NULL)
+            {
+              mapped_path = g_build_filename ("/run/interpreter-host", json_path, NULL);
+              json_path = mapped_path;
+            }
+
+          _srt_search_path_append (vulkan_path, json_path);
         }
     }
 
