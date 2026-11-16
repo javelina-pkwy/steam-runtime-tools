@@ -615,6 +615,7 @@ pv_bwrap_append_adjusted_exports (FlatpakBwrap *to,
            * mounting a version from the real root (if any) at the same
            * location. */
           if (interpreter_root != NULL
+              && pv_runtime_path_belongs_in_interpreter_root (NULL, from_src)
               && _srt_sysroot_test (interpreter_root, from_src,
                                     SRT_RESOLVE_FLAGS_NONE, NULL))
             {
